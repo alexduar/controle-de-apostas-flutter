@@ -1,7 +1,7 @@
 class Bet {
   final String game;
   final double amount;
-  final String status; // 'Ganhei' ou 'Perdi'
+  final String status;
   final double profitOrLoss;
   final String dateTime;
 

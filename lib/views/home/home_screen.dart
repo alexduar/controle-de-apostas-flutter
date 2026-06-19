@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../controllers/bet_controller.dart';
-import '../widgets/add_bet_modal.dart';
 import '../../core/constants/app_strings.dart';
+import '../widgets/add_bet_modal.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -61,7 +61,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     color: const Color(0xff1e1e1e),
                     borderRadius: BorderRadius.circular(15),
                     border: Border.all(
-                      color: totalBalance >= 0 ? const Color(0xff1fefb4) : const Color(0xffff4a4a),
+                      color: totalBalance >= 0
+                          ? const Color(0xff1fefb4)
+                          : const Color(0xffff4a4a),
                       width: 1,
                     ),
                   ),
@@ -71,9 +73,18 @@ class _HomeScreenState extends State<HomeScreen> {
                       const Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(AppStrings.totalBalance, style: TextStyle(color: Colors.grey, fontSize: 16)),
+                          Text(
+                            AppStrings.totalBalance,
+                            style: TextStyle(color: Colors.grey, fontSize: 16),
+                          ),
                           SizedBox(height: 5),
-                          Text(AppStrings.accumulatedHistory, style: TextStyle(color: Colors.white54, fontSize: 12)),
+                          Text(
+                            AppStrings.accumulatedHistory,
+                            style: TextStyle(
+                              color: Colors.white54,
+                              fontSize: 12,
+                            ),
+                          ),
                         ],
                       ),
                       Text(
@@ -81,7 +92,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: totalBalance >= 0 ? const Color(0xff1fefb4) : const Color(0xffff4a4a),
+                          color: totalBalance >= 0
+                              ? const Color(0xff1fefb4)
+                              : const Color(0xffff4a4a),
                         ),
                       ),
                     ],
@@ -91,47 +104,112 @@ class _HomeScreenState extends State<HomeScreen> {
                   padding: EdgeInsets.symmetric(horizontal: 16),
                   child: Align(
                     alignment: Alignment.centerLeft,
-                    child: Text('Suas Apostas', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    child: Text(
+                      AppStrings.yourBets,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 10),
                 Expanded(
                   child: _controller.bets.isEmpty
-                      ? const Center(child: Text('Nenhuma aposta registrada ainda.', style: TextStyle(color: Colors.white30)))
+                      ? const Center(
+                          child: Text(
+                            AppStrings.noBetsRegistered,
+                            style: TextStyle(color: Colors.white30),
+                          ),
+                        )
                       : ListView.builder(
                           itemCount: _controller.bets.length,
                           itemBuilder: (ctx, index) {
                             final bet = _controller.bets[index];
-                            final isWin = bet.status == 'Ganhei';
-                            return Card(
-                              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                              child: ListTile(
-                                leading: CircleAvatar(
-                                  backgroundColor: isWin ? const Color(0xff1fefb4).withOpacity(0.2) : const Color(0xffff4a4a).withOpacity(0.2),
-                                  child: Icon(
-                                    isWin ? Icons.arrow_upward : Icons.arrow_downward,
-                                    color: isWin ? const Color(0xff1fefb4) : const Color(0xffff4a4a),
-                                  ),
+                            final isWin = bet.status == AppStrings.statusWin;
+
+                            return Dismissible(
+                              key: UniqueKey(),
+                              direction: DismissDirection.endToStart,
+                              background: Container(
+                                color: const Color(0xffff4a4a).withOpacity(0.8),
+                                alignment: Alignment.centerRight,
+                                padding: const EdgeInsets.only(right: 20),
+                                margin: const EdgeInsets.symmetric(vertical: 6),
+                                child: const Icon(
+                                  Icons.delete,
+                                  color: Colors.white,
                                 ),
-                                title: Text(bet.game, style: const TextStyle(fontWeight: FontWeight.bold)),
-                                subtitle: Text('Apostado: R\$ ${bet.amount.toStringAsFixed(2)}\n${bet.dateTime}', style: const TextStyle(height: 1.3)),
-                                trailing: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    Text(
-                                      '${isWin ? "+" : ""} R\$ ${bet.profitOrLoss.toStringAsFixed(2)}',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
-                                        color: isWin ? const Color(0xff1fefb4) : const Color(0xffff4a4a),
+                              ),
+                              onDismissed: (direction) {
+                                _controller.deleteBet(bet);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      '${bet.game} ${AppStrings.betRemovedFeedback}',
+                                    ),
+                                    backgroundColor: Colors.grey[900],
+                                  ),
+                                );
+                              },
+                              child: Card(
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 6,
+                                ),
+                                child: ListTile(
+                                  leading: CircleAvatar(
+                                    backgroundColor: isWin
+                                        ? const Color(
+                                            0xff1fefb4,
+                                          ).withOpacity(0.2)
+                                        : const Color(
+                                            0xffff4a4a,
+                                          ).withOpacity(0.2),
+                                    child: Icon(
+                                      isWin
+                                          ? Icons.arrow_upward
+                                          : Icons.arrow_downward,
+                                      color: isWin
+                                          ? const Color(0xff1fefb4)
+                                          : const Color(0xffff4a4a),
+                                    ),
+                                  ),
+                                  title: Text(
+                                    bet.game,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  subtitle: Text(
+                                    '${AppStrings.betAmountLabel} ${bet.amount.toStringAsFixed(2)}\n${bet.dateTime}',
+                                    style: const TextStyle(height: 1.3),
+                                  ),
+                                  trailing: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      Text(
+                                        '${isWin ? "+" : ""} R\$ ${bet.profitOrLoss.toStringAsFixed(2)}',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
+                                          color: isWin
+                                              ? const Color(0xff1fefb4)
+                                              : const Color(0xffff4a4a),
+                                        ),
                                       ),
-                                    ),
-                                    Text(
-                                      bet.status,
-                                      style: TextStyle(fontSize: 11, color: isWin ? const Color(0xff1fefb4) : const Color(0xffff4a4a)),
-                                    ),
-                                  ],
+                                      Text(
+                                        bet.status,
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          color: isWin
+                                              ? const Color(0xff1fefb4)
+                                              : const Color(0xffff4a4a),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             );
@@ -140,11 +218,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ],
             ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0xff1fefb4),
-        foregroundColor: Colors.black,
-        onPressed: _openAddBetModal,
-        child: const Icon(Icons.add),
+      floatingActionButton: SizedBox(
+        width: 70,
+        height: 70,
+        child: FloatingActionButton(
+          backgroundColor: const Color(0xff1fefb4),
+          foregroundColor: Colors.black,
+          onPressed: _openAddBetModal,
+          child: const Icon(Icons.attach_money),
+        ),
       ),
     );
   }

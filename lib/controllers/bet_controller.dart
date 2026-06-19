@@ -56,6 +56,16 @@ class BetController extends ChangeNotifier {
     _bets.insert(0, newBet);
     notifyListeners();
 
+    await _saveToStorage();
+  }
+
+  Future<void> deleteBet(Bet bet) async {
+    _bets.remove(bet);
+    notifyListeners();
+    await _saveToStorage();
+  }
+
+  Future<void> _saveToStorage() async {
     final String encoded = jsonEncode(_bets.map((b) => b.toMap()).toList());
     await _storageService.saveBets(encoded);
   }
