@@ -15,6 +15,20 @@ class BetController extends ChangeNotifier {
 
   double get totalBalance => _bets.fold(0, (sum, item) => sum + item.profitOrLoss);
 
+  // NOVO: Agrupa as apostas por data (DD/MM/AAAA) para facilitar o extrato na View
+  Map<String, List<Bet>> get betsGroupedByDate {
+    final Map<String, List<Bet>> groups = {};
+    for (var bet in _bets) {
+      // Pega apenas a parte da data (ex: "18/06/2026") ignorando o horário
+      String dateKey = bet.dateTime.split(' ')[0]; 
+      if (groups[dateKey] == null) {
+        groups[dateKey] = [];
+      }
+      groups[dateKey]!.add(bet);
+    }
+    return groups;
+  }
+
   BetController() {
     loadBets();
   }
